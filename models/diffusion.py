@@ -170,7 +170,7 @@ class Diffusion(pl.LightningModule):
     
         # ---------------- Backward Process ----------------
         # Subset of denoising steps
-        step_size = 20
+        step_size = 100
         t_subset = torch.arange(0, self.noise_steps, step_size, device=self.device).long() # Values from [0, 999]
         
         # Initial random noise state variable
@@ -178,8 +178,9 @@ class Diffusion(pl.LightningModule):
         x = torch.randn_like(x_0)
         t = t_subset[-1]
         sampling_history = [x.squeeze().detach().cpu().numpy()]
+
         # ---------------- Backward Process ----------------
-        for t_next in reversed(t_subset):
+        for t_next in reversed(t_subset[:-1]):
             a_t = self.alphas_cumprod[t]
             a_tnext = self.alphas_cumprod[t_next]
             
@@ -190,20 +191,7 @@ class Diffusion(pl.LightningModule):
             x = self.add_constraints(x, x_0)
             sampling_history.append(x.squeeze().detach().cpu().numpy())
             t = t_next # Update t to next element in the subset
-        
-        # # # ADD LAST DENOISING STEP TO t = 0
-        # a_t = self.alphas_cumprod[t]
-        # a_tnext = self.alphas_cumprod[0]
-        # x_1 = a_tnext.sqrt() * (x - (1 - a_t).sqrt() * self.noise_estimator(x, t, obs_cond) ) / a_t.sqrt()
-        # x_2 = (1 - a_tnext  ).sqrt() * self.noise_estimator(x, t, obs_cond)### Currently set ETA to 0 -- DDPM is switched off
 
-        # x = x_1 + x_2
-        # x = self.add_constraints(x, x_0)
-        # sampling_history.append(x.squeeze().detach().cpu().numpy())
-        
-
-
-        
         plt_toVideo(self,
                 sampling_history,
                 positions_groundtruth = positions_groundtruth,

@@ -115,7 +115,7 @@ def plt_toVideo(self,
             plt.ylim(-1.5, 1.5)
 
         fig.animation = FuncAnimation(fig, animate, frames=self.denoising_steps, interval=50, repeat=False)
-        fig.animation.save('./animations/' + self.date + 'animation_positions.gif', writer='pillow')
+        fig.animation.save('./animations/' + self.date + 'animation_positions.mp4')
         print("Animation saved")
         plt.close('all')
 
